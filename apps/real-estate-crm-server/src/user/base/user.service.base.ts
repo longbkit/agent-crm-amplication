@@ -13,6 +13,8 @@ import { PrismaService } from "../../prisma/prisma.service";
 import { Prisma, User as PrismaUser } from "@prisma/client";
 import { PasswordService } from "../../auth/password.service";
 import { transformStringFieldUpdateInput } from "../../prisma.util";
+import { UserCreateInput } from "./UserCreateInput";
+import { ChangePasswordInput } from "../ChangePasswordInput";
 
 export class UserServiceBase {
   constructor(
@@ -58,5 +60,26 @@ export class UserServiceBase {
   }
   async deleteUser(args: Prisma.UserDeleteArgs): Promise<PrismaUser> {
     return this.prisma.user.delete(args);
+  }
+  async AssignRole(args: UserCreateInput): Promise<UserCreateInput> {
+    throw new Error("Not implemented");
+  }
+  async ChangePassword(args: ChangePasswordInput): Promise<boolean> {
+    throw new Error("Not implemented");
+  }
+  async ForgotPassword(args: string): Promise<string> {
+    throw new Error("Not implemented");
+  }
+  async Login(args: UserCreateInput): Promise<string> {
+    throw new Error("Not implemented");
+  }
+  async Logout(args: string): Promise<boolean> {
+    throw new Error("Not implemented");
+  }
+  async RegisterUser(args: UserCreateInput): Promise<UserCreateInput> {
+    throw new Error("Not implemented");
+  }
+  async ResetPassword(args: UserCreateInput): Promise<string> {
+    throw new Error("Not implemented");
   }
 }

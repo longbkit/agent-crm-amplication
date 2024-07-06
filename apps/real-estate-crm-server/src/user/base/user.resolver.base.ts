@@ -26,6 +26,8 @@ import { UserFindUniqueArgs } from "./UserFindUniqueArgs";
 import { CreateUserArgs } from "./CreateUserArgs";
 import { UpdateUserArgs } from "./UpdateUserArgs";
 import { DeleteUserArgs } from "./DeleteUserArgs";
+import { UserCreateInput } from "./UserCreateInput";
+import { ChangePasswordInput } from "../ChangePasswordInput";
 import { UserService } from "../user.service";
 @common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => User)
@@ -130,5 +132,61 @@ export class UserResolverBase {
       }
       throw error;
     }
+  }
+
+  @graphql.Mutation(() => UserCreateInput)
+  async AssignRole(
+    @graphql.Args()
+    args: UserCreateInput
+  ): Promise<UserCreateInput> {
+    return this.service.AssignRole(args);
+  }
+
+  @graphql.Mutation(() => Boolean)
+  async ChangePassword(
+    @graphql.Args()
+    args: ChangePasswordInput
+  ): Promise<boolean> {
+    return this.service.ChangePassword(args);
+  }
+
+  @graphql.Mutation(() => String)
+  async ForgotPassword(
+    @graphql.Args()
+    args: string
+  ): Promise<string> {
+    return this.service.ForgotPassword(args);
+  }
+
+  @graphql.Mutation(() => String)
+  async Login(
+    @graphql.Args()
+    args: UserCreateInput
+  ): Promise<string> {
+    return this.service.Login(args);
+  }
+
+  @graphql.Mutation(() => Boolean)
+  async Logout(
+    @graphql.Args()
+    args: string
+  ): Promise<boolean> {
+    return this.service.Logout(args);
+  }
+
+  @graphql.Mutation(() => UserCreateInput)
+  async RegisterUser(
+    @graphql.Args()
+    args: UserCreateInput
+  ): Promise<UserCreateInput> {
+    return this.service.RegisterUser(args);
+  }
+
+  @graphql.Mutation(() => String)
+  async ResetPassword(
+    @graphql.Args()
+    args: UserCreateInput
+  ): Promise<string> {
+    return this.service.ResetPassword(args);
   }
 }

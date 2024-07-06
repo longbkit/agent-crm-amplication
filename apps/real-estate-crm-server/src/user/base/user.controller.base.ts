@@ -204,4 +204,123 @@ export class UserControllerBase {
       throw error;
     }
   }
+
+  @common.Post("/assign-role")
+  @swagger.ApiOkResponse({
+    type: UserCreateInput,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async AssignRole(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<UserCreateInput> {
+    return this.service.AssignRole(body);
+  }
+
+  @common.Post("/change-password")
+  @swagger.ApiOkResponse({
+    type: Boolean,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async ChangePassword(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<boolean> {
+    return this.service.ChangePassword(body);
+  }
+
+  @common.Post("/forgot-password")
+  @swagger.ApiOkResponse({
+    type: String,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async ForgotPassword(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<string> {
+    return this.service.ForgotPassword(body);
+  }
+
+  @common.Post("/login")
+  @swagger.ApiOkResponse({
+    type: String,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async Login(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<string> {
+    return this.service.Login(body);
+  }
+
+  @common.Post("/logout")
+  @swagger.ApiOkResponse({
+    type: Boolean,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async Logout(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<boolean> {
+    return this.service.Logout(body);
+  }
+
+  @common.Post("/register")
+  @swagger.ApiOkResponse({
+    type: UserCreateInput,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async RegisterUser(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<UserCreateInput> {
+    return this.service.RegisterUser(body);
+  }
+
+  @common.Post("/reset-password")
+  @swagger.ApiOkResponse({
+    type: String,
+  })
+  @swagger.ApiNotFoundResponse({
+    type: errors.NotFoundException,
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
+  async ResetPassword(
+    @common.Body()
+    body: UserCreateInput
+  ): Promise<string> {
+    return this.service.ResetPassword(body);
+  }
 }
