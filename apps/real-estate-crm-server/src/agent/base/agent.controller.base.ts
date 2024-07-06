@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { AgentService } from "../agent.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { AgentCreateInput } from "./AgentCreateInput";
 import { Agent } from "./Agent";
 import { AgentFindManyArgs } from "./AgentFindManyArgs";
 import { AgentWhereUniqueInput } from "./AgentWhereUniqueInput";
 import { AgentUpdateInput } from "./AgentUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class AgentControllerBase {
-  constructor(protected readonly service: AgentService) {}
+  constructor(
+    protected readonly service: AgentService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Agent })
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createAgent(@common.Body() data: AgentCreateInput): Promise<Agent> {
     return await this.service.createAgent({
       data: data,
@@ -38,9 +56,18 @@ export class AgentControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Agent] })
   @ApiNestedQuery(AgentFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async agents(@common.Req() request: Request): Promise<Agent[]> {
     const args = plainToClass(AgentFindManyArgs, request.query);
     return this.service.agents({
@@ -53,9 +80,18 @@ export class AgentControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Agent })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async agent(
     @common.Param() params: AgentWhereUniqueInput
   ): Promise<Agent | null> {
@@ -75,9 +111,18 @@ export class AgentControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Agent })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateAgent(
     @common.Param() params: AgentWhereUniqueInput,
     @common.Body() data: AgentUpdateInput
@@ -105,6 +150,14 @@ export class AgentControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Agent })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteAgent(
     @common.Param() params: AgentWhereUniqueInput
   ): Promise<Agent | null> {

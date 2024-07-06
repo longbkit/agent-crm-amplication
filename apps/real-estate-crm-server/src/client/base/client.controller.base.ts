@@ -16,17 +16,35 @@ import * as errors from "../../errors";
 import { Request } from "express";
 import { plainToClass } from "class-transformer";
 import { ApiNestedQuery } from "../../decorators/api-nested-query.decorator";
+import * as nestAccessControl from "nest-access-control";
+import * as defaultAuthGuard from "../../auth/defaultAuth.guard";
 import { ClientService } from "../client.service";
+import { AclValidateRequestInterceptor } from "../../interceptors/aclValidateRequest.interceptor";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { ClientCreateInput } from "./ClientCreateInput";
 import { Client } from "./Client";
 import { ClientFindManyArgs } from "./ClientFindManyArgs";
 import { ClientWhereUniqueInput } from "./ClientWhereUniqueInput";
 import { ClientUpdateInput } from "./ClientUpdateInput";
 
+@swagger.ApiBearerAuth()
+@common.UseGuards(defaultAuthGuard.DefaultAuthGuard, nestAccessControl.ACGuard)
 export class ClientControllerBase {
-  constructor(protected readonly service: ClientService) {}
+  constructor(
+    protected readonly service: ClientService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Post()
   @swagger.ApiCreatedResponse({ type: Client })
+  @nestAccessControl.UseRoles({
+    resource: "Client",
+    action: "create",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async createClient(@common.Body() data: ClientCreateInput): Promise<Client> {
     return await this.service.createClient({
       data: data,
@@ -38,9 +56,18 @@ export class ClientControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get()
   @swagger.ApiOkResponse({ type: [Client] })
   @ApiNestedQuery(ClientFindManyArgs)
+  @nestAccessControl.UseRoles({
+    resource: "Client",
+    action: "read",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async clients(@common.Req() request: Request): Promise<Client[]> {
     const args = plainToClass(ClientFindManyArgs, request.query);
     return this.service.clients({
@@ -53,9 +80,18 @@ export class ClientControllerBase {
     });
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @common.Get("/:id")
   @swagger.ApiOkResponse({ type: Client })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Client",
+    action: "read",
+    possession: "own",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async client(
     @common.Param() params: ClientWhereUniqueInput
   ): Promise<Client | null> {
@@ -75,9 +111,18 @@ export class ClientControllerBase {
     return result;
   }
 
+  @common.UseInterceptors(AclValidateRequestInterceptor)
   @common.Patch("/:id")
   @swagger.ApiOkResponse({ type: Client })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Client",
+    action: "update",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async updateClient(
     @common.Param() params: ClientWhereUniqueInput,
     @common.Body() data: ClientUpdateInput
@@ -105,6 +150,14 @@ export class ClientControllerBase {
   @common.Delete("/:id")
   @swagger.ApiOkResponse({ type: Client })
   @swagger.ApiNotFoundResponse({ type: errors.NotFoundException })
+  @nestAccessControl.UseRoles({
+    resource: "Client",
+    action: "delete",
+    possession: "any",
+  })
+  @swagger.ApiForbiddenResponse({
+    type: errors.ForbiddenException,
+  })
   async deleteClient(
     @common.Param() params: ClientWhereUniqueInput
   ): Promise<Client | null> {

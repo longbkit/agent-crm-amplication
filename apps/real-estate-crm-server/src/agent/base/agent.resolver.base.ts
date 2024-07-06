@@ -13,16 +13,31 @@ import * as graphql from "@nestjs/graphql";
 import { GraphQLError } from "graphql";
 import { isRecordNotFoundError } from "../../prisma.util";
 import { MetaQueryPayload } from "../../util/MetaQueryPayload";
+import * as nestAccessControl from "nest-access-control";
+import * as gqlACGuard from "../../auth/gqlAC.guard";
+import { GqlDefaultAuthGuard } from "../../auth/gqlDefaultAuth.guard";
+import * as common from "@nestjs/common";
+import { AclFilterResponseInterceptor } from "../../interceptors/aclFilterResponse.interceptor";
 import { Agent } from "./Agent";
 import { AgentCountArgs } from "./AgentCountArgs";
 import { AgentFindManyArgs } from "./AgentFindManyArgs";
 import { AgentFindUniqueArgs } from "./AgentFindUniqueArgs";
 import { DeleteAgentArgs } from "./DeleteAgentArgs";
 import { AgentService } from "../agent.service";
+@common.UseGuards(GqlDefaultAuthGuard, gqlACGuard.GqlACGuard)
 @graphql.Resolver(() => Agent)
 export class AgentResolverBase {
-  constructor(protected readonly service: AgentService) {}
+  constructor(
+    protected readonly service: AgentService,
+    protected readonly rolesBuilder: nestAccessControl.RolesBuilder
+  ) {}
 
+  @graphql.Query(() => MetaQueryPayload)
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "read",
+    possession: "any",
+  })
   async _agentsMeta(
     @graphql.Args() args: AgentCountArgs
   ): Promise<MetaQueryPayload> {
@@ -32,12 +47,24 @@ export class AgentResolverBase {
     };
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => [Agent])
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "read",
+    possession: "any",
+  })
   async agents(@graphql.Args() args: AgentFindManyArgs): Promise<Agent[]> {
     return this.service.agents(args);
   }
 
+  @common.UseInterceptors(AclFilterResponseInterceptor)
   @graphql.Query(() => Agent, { nullable: true })
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "read",
+    possession: "own",
+  })
   async agent(
     @graphql.Args() args: AgentFindUniqueArgs
   ): Promise<Agent | null> {
@@ -49,6 +76,11 @@ export class AgentResolverBase {
   }
 
   @graphql.Mutation(() => Agent)
+  @nestAccessControl.UseRoles({
+    resource: "Agent",
+    action: "delete",
+    possession: "any",
+  })
   async deleteAgent(
     @graphql.Args() args: DeleteAgentArgs
   ): Promise<Agent | null> {
